@@ -11,9 +11,9 @@ editor: visual
 warning: False
 ---
 
-## Titanic dataset
+# Titanic dataset
 
-#### Import packages and read data
+## Import packages and read data
 
 ```{r}
 #| label: import packages and read data
@@ -29,7 +29,7 @@ data(titanic_train)
 head(titanic_train)
 ```
 
-#### Variables describtion
+## Variables describtion
 
 ```{r}
 #| label: summary data
@@ -38,7 +38,7 @@ summary(titanic_train)
 
 ```
 
-#### 
+## Variable description
 
 -   **Survival**: Survival status (0 = No 38%, 1 = Yes 62%)
 
@@ -62,7 +62,7 @@ summary(titanic_train)
 
 -   **Embarked**: Port of embarkation (C = Cherbourg 19%, Q = Queenstown 9%, S = Southampton 72%, 2 missing values)
 
-#### Transformation
+## Transformation
 
 ```{r}
 #| label: transform
@@ -93,7 +93,7 @@ titanic_train = titanic_train %>% select(-c(PassengerId, Name, Ticket, Cabin))
 summary(titanic_train)
 ```
 
-#### Visuallization
+## Visuallization
 
 ```{r ggpairs_plot, fig.width=12, fig.height=12, out.width="100%"}
 
@@ -125,7 +125,7 @@ f)  Fare and Survival (Fare) Higher Fare is positively correlated with survival 
 
 g)  Embarkation Port (Embarked) Most passengers embarked from Southampton (S). Higher survival rates are observed among passengers from Cherbourg (C), likely due to a higher proportion of first-class passengers.
 
-#### Appendix
+## Appendix
 
 ```{r}
 ggplot(titanic_train, aes(x = Age)) +
