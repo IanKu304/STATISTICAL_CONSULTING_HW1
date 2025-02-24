@@ -26,7 +26,7 @@
 
 -   **Embarked**: Port of embarkation (C = Cherbourg 19%, Q = Queenstown 9%, S = Southampton 72%, 2 missing values)
 
-
+## Discussion
 a)  Survival Analysis (Survived) More people did not survive (Survived = 0, shown in red). The survival rate seems to vary significantly with Sex and Pclass.
 
 b)  Passenger Class (Pclass) First-class (Pclass = 1) passengers had a higher fare and survival rate. Third-class (Pclass = 3) passengers had the lowest survival rate.
