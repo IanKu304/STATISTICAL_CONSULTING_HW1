@@ -1,27 +1,178 @@
 ---
 title: "HW1"
-author: "以恩"
-format: pdf
+author: "顧以恩 RE6131066"
+format: 
+  pdf:
+    documentclass: ctexart
+    number-sections: true
+    mainfont: "SimSun"  
+    latex-engine: xelatex
 editor: visual
+warning: False
 ---
 
-## Quarto
+## Titanic dataset
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+#### Import packages and read data
 
 ```{r}
-1 + 1
+#| label: import packages and read data
+
+#install.packages("titanic")
+library(titanic)
+library(dplyr)
+library(ggplot2)
+library(GGally)
+
+
+data(titanic_train)
+head(titanic_train)
 ```
 
-You can add options to executable code like this
+#### Variables describtion
 
 ```{r}
-#| echo: false
-2 * 2
+#| label: summary data
+
+summary(titanic_train)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+#### 
+
+-   **Survival**: Survival status (0 = No 38%, 1 = Yes 62%)
+
+<!-- -->
+
+-   **Pclass**: Ticket class (Ordinal variable: 1 = 1st, 2 = 2nd, 3 = 3rd)
+
+-   **Sex**: Gender (Nominal variable: male = Male 65%, female = Female 35%)
+
+-   **Age**: Age (Continuous variable: 0.42 - 80, 177 missing values)
+
+-   **SibSp**: Number of siblings or spouses aboard the ship (Ordinal variable: 0 - 8)
+
+-   **Parch**: Number of parents or children aboard the ship (Ordinal variable: 0 - 6)
+
+-   **Ticket**: Ticket number
+
+-   **Fare**: Ticket price (Continuous variable: 0 - 512, no missing values)
+
+-   **Cabin**: Cabin number
+
+-   **Embarked**: Port of embarkation (C = Cherbourg 19%, Q = Queenstown 9%, S = Southampton 72%, 2 missing values)
+
+#### Transformation
+
+```{r}
+#| label: transform
+
+# Sex should be binary categorical variable
+# Therefore transform it into factor
+print(length(table(titanic_train$Sex)))
+titanic_train$Sex = as.factor(titanic_train$Sex)
+
+#Embarked is also categorical variable, transform it into factor
+print(length(table(titanic_train$Embarked)))
+titanic_train$Embarked = as.factor(titanic_train$Embarked)
+titanic_train = titanic_train %>% mutate(Survived = as.factor(Survived),
+                                         Sex = as.factor(Sex),
+                                         #SibSp = as.factor(SibSp),
+                                         #Parch = as.factor(Parch),
+                                         Embarked = ifelse(Embarked=="",NA,Embarked) %>% as.factor()
+                                         )
+
+
+# Name, Ticket and Cabin variables are all charactors
+head(titanic_train$Name,5)
+head(titanic_train$Ticket,5)
+head(titanic_train$Cabin,5)
+
+titanic_train = titanic_train %>% select(-c(PassengerId, Name, Ticket, Cabin))
+
+summary(titanic_train)
+```
+
+#### Visuallization
+
+```{r ggpairs_plot, fig.width=12, fig.height=12, out.width="100%"}
+
+
+ggpairs(
+  titanic_train,
+  title = "Pairwise Relationships in Titanic Dataset",
+  lower = list(continuous = wrap("smooth", method = "lm", se = FALSE)), # 下三角加入回歸線
+  upper = list(continuous = wrap("cor", size = 4)), # 上三角顯示相關係數
+  diag = list(continuous = "barDiag"), # 對角線繪製直方圖
+  mapping = aes(color = Survived) # 顏色區分存活
+) +
+  theme_minimal()
+
+
+```
+
+a)  Survival Analysis (Survived) More people did not survive (Survived = 0, shown in red). The survival rate seems to vary significantly with Sex and Pclass.
+
+b)  Passenger Class (Pclass) First-class (Pclass = 1) passengers had a higher fare and survival rate. Third-class (Pclass = 3) passengers had the lowest survival rate.
+
+c)  Gender Influence (Sex) Female passengers had a higher survival rate than males. Males had a lower chance of survival, as indicated by the red proportion in the Sex vs. Survived plots.
+
+d)  Age Distribution (Age) Young children had a higher survival rate. The majority of passengers were adults. There is a negative correlation between Age and Survival (older passengers had a lower chance of survival).
+
+e)  Family Members (SibSp and Parch) Having more siblings/spouses (SibSp) or parents/children (Parch) slightly increases survival probability, but very high numbers reduce survival chances. Large families had a lower survival rate compared to single passengers.
+
+f)  Fare and Survival (Fare) Higher Fare is positively correlated with survival (Corr = 0.538\*\*\*), indicating that wealthier passengers had better chances. This aligns with the observation that first-class passengers survived more.
+
+g)  Embarkation Port (Embarked) Most passengers embarked from Southampton (S). Higher survival rates are observed among passengers from Cherbourg (C), likely due to a higher proportion of first-class passengers.
+
+#### Appendix
+
+```{r}
+ggplot(titanic_train, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "black") +
+  labs(title = "Age Distribution", x = "Age", y = "Count")
+```
+
+```{r}
+
+ggplot(titanic_train, aes(x = Fare, fill = as.factor(Survived))) +
+  geom_histogram(binwidth = 20, fill = "lightcoral", color = "black") +
+  labs(title = "Fare Distribution", x = "Fare", y = "Count")
+```
+
+```{r}
+ggplot(titanic_train, aes(x = as.factor(Survived), y = Age, fill = as.factor(Survived))) +
+  geom_boxplot() +
+  labs(title = "Age Distribution by Survival", x = "Survived", y = "Age") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(titanic_train, aes(x = as.factor(Survived), y = Fare, fill = as.factor(Survived))) +
+  geom_boxplot() +
+  labs(title = "Fare Distribution by Survival", x = "Survived", y = "Fare") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(titanic_train, aes(x = Pclass, fill = as.factor(Survived))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survival Rate by Passenger Class", x = "Passenger Class", y = "Proportion") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(titanic_train, aes(x = Sex, fill = as.factor(Survived))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survival Rate by Gender", x = "Sex", y = "Proportion") +
+  theme_minimal()
+
+```
+
+```{r}
+library(ggcorrplot)
+
+cor_matrix <- cor(titanic_train[, sapply(titanic_train, is.numeric)], use = "complete.obs")
+ggcorrplot(cor_matrix, lab = TRUE)
+
+```
